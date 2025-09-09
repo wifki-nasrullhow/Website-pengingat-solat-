@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi Azan</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        body.light-mode {
+            background: linear-gradient(135deg, #4b6cb7, #182848, #4b6cb7);
+            color: #333;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        body.light-mode .container {
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        body.light-mode header {
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            animation: fadeIn 1s ease;
+        }
+        
+        body.light-mode h1 {
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+            color: #1a2a6c;
+        }
+        
+        .date-display {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .location {
+            margin: 15px 0;
+            font-size: 1.1rem;
+        }
+        
+        .prayer-times {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .prayer-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            transition: transform 0.3s, background 0.3s, box-shadow 0.3s;
+            animation: slideUp 0.5s ease;
+        }
+        
+        body.light-mode .prayer-card {
+            background: rgba(255, 255, 255, 0.7);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .prayer-card.active {
+            background: rgba(255, 215, 0, 0.2);
+            transform: scale(1.05);
+            border: 1px solid gold;
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+        }
+        
+        body.light-mode .prayer-card.active {
+            background: rgba(255, 215, 0, 0.4);
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.4);
+        }
+        
+        .prayer-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .prayer-time {
+            font-size: 1.4rem;
+            font-weight: bold;
+        }
+        
+        .countdown {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            animation: fadeIn 1s ease;
+        }
+        
+        body.light-mode .countdown {
+            background: rgba(255, 255, 255, 0.7);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .countdown-text {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .countdown-timer {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #ffdd00;
+            animation: pulse 2s infinite;
+        }
+        
+        body.light-mode .countdown-timer {
+            color: #1a2a6c;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 50px;
+            background: rgba(255, 215, 0, 0.9);
+            color: #333;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: fadeIn 1s ease;
+        }
+        
+        button:hover {
+            background: gold;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        #stop-button {
+            display: none;
+            background: rgba(220, 53, 69, 0.9);
+            color: white;
+        }
+        
+        #stop-button:hover {
+            background: #dc3545;
+        }
+        
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .theme-toggle:hover {
+            transform: rotate(30deg);
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .volume-control {
+            text-align: center;
+            margin-top: 20px;
+            animation: fadeIn 1s ease;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transform: translateX(150%);
+            transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            z-index: 1000;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        /* Gaya untuk kutipan */
+        .quote-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 30px 0;
+            text-align: center;
+            border-left: 4px solid gold;
+            animation: slideUp 0.5s ease;
+        }
+        
+        body.light-mode .quote-section {
+            background: rgba(255, 255, 255, 0.7);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .quote-arabic {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            line-height: 1.6;
+            font-family: 'Traditional Arabic', 'Scheherazade New', serif;
+            animation: fadeIn 1s ease;
+        }
+        
+        .quote-transliteration {
+            font-style: italic;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+            opacity: 0.9;
+            animation: fadeIn 1.2s ease;
+        }
+        
+        .quote-translation {
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+            animation: fadeIn 1.4s ease;
+        }
+        
+        .quote-reference {
+            font-size: 0.9rem;
+            opacity: 0.7;
+            animation: fadeIn 1.6s ease;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 0.9rem;
+            opacity: 0.7;
+            animation: fadeIn 1s ease;
+        }
+        
+        body.light-mode footer {
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        .location-selector {
+            margin: 15px 0;
+            text-align: center;
+            animation: fadeIn 1s ease;
+        }
+        
+        .location-selector select {
+            padding: 10px 15px;
+            border-radius: 50px;
+            border: none;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 1rem;
+            width: 80%;
+            max-width: 300px;
+        }
+        
+        body.light-mode .location-selector select {
+            background: rgba(255, 255, 255, 0.7);
+            color: #333;
+        }
+        
+        .calculation-settings {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .settings-title {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .settings-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        
+        .setting-group {
+            margin-bottom: 10px;
+        }
+        
+        .setting-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .setting-group select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 5px;
+            border: none;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        
+        body.light-mode .setting-group select {
+            background: rgba(255, 255, 255, 0.7);
+            color: #333;
+        }
+        
+        /* Tasbih Digital Styles */
+        .tasbih-container {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .tasbih-counter {
+            font-size: 4rem;
+            font-weight: bold;
+            color: #ffdd00;
+            margin: 20px 0;
+            text-shadow: 0 0 10px rgba(255, 221, 0, 0.5);
+        }
+        
+        .tasbih-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .tasbih-button {
+            padding: 15px 25px;
+            border: none;
+            border-radius: 50px;
+            background: rgba(255, 215, 0, 0.9);
+            color: #333;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .tasbih-button:hover {
+            background: gold;
+            transform: translateY(-3px);
+        }
+        
+        .tasbih-types {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .tasbih-type {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .tasbih-type.active {
+            background: rgba(255, 215, 0, 0.9);
+            color: #333;
+        }
+        
+        .tasbih-text {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+        }
+        
+        .tasbih-arabic {
+            font-size: 1.5rem;
+            font-family: 'Traditional Arabic', 'Scheherazade New', serif;
+            margin-bottom: 10px;
+        }
+        
+        /* Animasi */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideUp {
+            from { 
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        @media (max-width: 600px) {
+            .prayer-times {
+                grid-template-columns: 1fr;
+            }
+            
+            .settings-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .quote-arabic {
+                font-size: 1.4rem;
+            }
+            
+            .theme-toggle {
+                top: 10px;
+                right: 10px;
+                width: 40px;
+                height: 40px;
+            }
+            
+            .tasbih-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .tasbih-types {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="theme-toggle" id="theme-toggle">🌙</button>
+        
+        <header>
+            <h1>Aplikasi Azan</h1>
+            <div class="date-display" id="date-display">Minggu, 1 Januari 2023</div>
+            <div class="location" id="location">Tangerang, Indonesia</div>
+        </header>
+        
+        <div class="location-selector">
+            <select id="city-select">
+                <option value="Tangerang">Tangerang</option>
+                <option value="Jakarta">Jakarta</option>
+                <option value="Bandung">Bandung</option>
+                <option value="Surabaya">Surabaya</option>
+                <option value="Yogyakarta">Yogyakarta</option>
+                <option value="Medan">Medan</option>
+                <option value="Makassar">Makassar</option>
+            </select>
+        </div>
+        
+        <div class="calculation-settings">
+            <div class="settings-title">Pengaturan Perhitungan Waktu Sholat</div>
+            <div class="settings-grid">
+                <div class="setting-group">
+                    <label for="method-select">Metode Perhitungan:</label>
+                    <select id="method-select">
+                        <option value="Kemenag">Kemenag (Indonesia)</option>
+                        <option value="MWL">Muslim World League</option>
+                        <option value="ISNA">Islamic Society of North America</option>
+                        <option value="Egypt">Egyptian General Authority</option>
+                    </select>
+                </div>
+                
+                <div class="setting-group">
+                    <label for="madhhab-select">Mazhab untuk Waktu Ashar:</label>
+                    <select id="madhhab-select">
+                        <option value="Standard">Standard (Syafi'i, Maliki, Hanbali)</option>
+                        <option value="Hanafi">Hanafi</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <div class="prayer-times" id="prayer-times">
+            <!-- Waktu sholat akan diisi oleh JavaScript -->
+        </div>
+        
+        <div class="countdown">
+            <div class="countdown-text">Menuju sholat berikutnya:</div>
+            <div class="countdown-timer" id="countdown">00:00:00</div>
+        </div>
+        
+        <!-- Tasbih Digital Section -->
+        <div class="tasbih-container">
+            <h3>Tasbih Digital</h3>
+            
+            <div class="tasbih-counter" id="tasbih-counter">0</div>
+            
+            <div class="tasbih-buttons">
+                <button class="tasbih-button" id="tasbih-add">Tasbih (+1)</button>
+                <button class="tasbih-button" id="tasbih-reset">Reset</button>
+            </div>
+            
+            <div class="tasbih-types">
+                <button class="tasbih-type active" data-type="tasbih">Tasbih</button>
+                <button class="tasbih-type" data-type="tahmid">Tahmid</button>
+                <button class="tasbih-type" data-type="takbir">Takbir</button>
+            </div>
+            
+            <div class="tasbih-text">
+                <div class="tasbih-arabic" id="tasbih-arabic">سُبْحَانَ اللَّهِ</div>
+                <div id="tasbih-translation">"Maha Suci Allah"</div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button id="test-button">Test Suara Azan</button>
+            <button id="stop-button">Hentikan Azan</button>
+        </div>
+        
+        <div class="volume-control">
+            <label for="volume">Volume: </label>
+            <input type="range" id="volume" min="0" max="1" step="0.1" value="0.7">
+        </div>
+        
+        <!-- Quotes Section (dipindahkan ke bawah) -->
+        <div class="quote-section" id="quote-section">
+            <div class="quote-arabic">أَقِمِ الصَّلَاةَ لِدُلُوكِ الشَّمْسِ إِلَىٰ غَسَقِ اللَّيْلِ وَقُرْآنَ الْفَجْرِ ۖ إِنَّ قُرْآنَ الْفَجْرِ كَانَ مَشْهُودًا</div>
+            <div class="quote-transliteration">Aqimiṣ-ṣalāta lidulūkisy-syamsi ilā gasqil-laili wa qur'ānal-fajr, inna qur'ānal-fajri kāna masyhūdā</div>
+            <div class="quote-translation">"Dirikanlah sholat dari sesudah matahari tergelincir sampai gelap malam dan (dirikanlah pula sholat) subuh. Sesungguhnya sholat subuh itu disaksikan (oleh malaikat)."</div>
+            <div class="quote-reference">(QS. Al-Isra: 78)</div>
+        </div>
+        
+        <footer>
+            Aplikasi Azan &copy; 2025 - Hanya berbunyi pada waktu sholat
+        </footer>
+    </div>
+    
+    <div class="notification" id="notification">
+        <div id="notification-text">Waktu Sholat Telah Tiba</div>
+    </div>
+    <audio id="azan-audio" preload="auto">
+        <source src="Azan Arab.mp3" type="audio/mpeg">
+    </audio>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elemen DOM
+            const dateDisplay = document.getElementById('date-display');
+            const locationDisplay = document.getElementById('location');
+            const prayerTimesContainer = document.getElementById('prayer-times');
+            const countdownElement = document.getElementById('countdown');
+            const testButton = document.getElementById('test-button');
+            const stopButton = document.getElementById('stop-button');
+            const volumeControl = document.getElementById('volume');
+            const azanAudio = document.getElementById('azan-audio');
+            const notification = document.getElementById('notification');
+            const notificationText = document.getElementById('notification-text');
+            const themeToggle = document.getElementById('theme-toggle');
+            const citySelect = document.getElementById('city-select');
+            const methodSelect = document.getElementById('method-select');
+            const madhhabSelect = document.getElementById('madhhab-select');
+            const quoteSection = document.getElementById('quote-section');
+            
+            // Tasbih Digital Elements
+            const tasbihCounter = document.getElementById('tasbih-counter');
+            const tasbihAdd = document.getElementById('tasbih-add');
+            const tasbihReset = document.getElementById('tasbih-reset');
+            const tasbihTypes = document.querySelectorAll('.tasbih-type');
+            const tasbihArabic = document.getElementById('tasbih-arabic');
+            const tasbihTranslation = document.getElementById('tasbih-translation');
+            
+            // Data koordinat kota-kota di Indonesia
+            const cityCoordinates = {
+                'Tangerang': { lat: -6.1783, lng: 106.6319, timezone: 7, elevation: 18 },
+                'Jakarta': { lat: -6.2088, lng: 106.8456, timezone: 7, elevation: 8 },
+                'Bandung': { lat: -6.9175, lng: 107.6191, timezone: 7, elevation: 768 },
+                'Surabaya': { lat: -7.2575, lng: 112.7521, timezone: 7, elevation: 5 },
+                'Yogyakarta': { lat: -7.7956, lng: 110.3695, timezone: 7, elevation: 113 },
+                'Medan': { lat: 3.5952, lng: 98.6722, timezone: 7, elevation: 35 },
+                'Makassar': { lat: -5.1477, lng: 119.4327, timezone: 8, elevation: 15 }
+            };
+            
+            // Parameter metode perhitungan (FAJR_ANGLE, ISHA_ANGLE)
+            const calculationMethods = {
+                'Kemenag': { fajr: 20, isha: 18 },
+                'MWL': { fajr: 18, isha: 17 },
+                'ISNA': { fajr: 15, isha: 15 },
+                'Egypt': { fajr: 19.5, isha: 17.5 }
+            };
+            
+            // Data quotes tentang sholat
+            const quotes = [
+                {
+                    arabic: "أَقِمِ الصَّلَاةَ لِدُلُوكِ الشَّمْسِ إِلَىٰ غَسَقِ اللَّيْلِ وَقُرْآنَ الْفَجْرِ ۖ إِنَّ قُرْآنَ الْفَجْرِ كَانَ مَشْهُودًا",
+                    transliteration: "Aqimiṣ-ṣalāta lidulūkisy-syamsi ilā gasqil-laili wa qur'ānal-fajr, inna qur'ānal-fajri kāna masyhūdā",
+                    translation: "\"Dirikanlah sholat dari sesudah matahari tergelincir sampai gelap malam dan (dirikanlah pula sholat) subuh. Sesungguhnya sholat subuh itu disaksikan (oleh malaikat).\"",
+                    reference: "QS. Al-Isra: 78"
+                },
+                {
+                    arabic: "وَاسْتَعِينُوا بِالصَّبْرِ وَالصَّلَاةِ ۚ وَإِنَّهَا لَكَبِيرَةٌ إِلَّا عَلَى الْخَاشِعِينَ",
+                    transliteration: "Wasta'īnū biṣ-ṣabri waṣ-ṣalāh, wa innahā lakabīratun illā 'alal-khāsyi'īn",
+                    translation: "\"Jadikanlah sabar dan sholat sebagai penolongmu. Dan sesungguhnya yang demikian itu sungguh berat, kecuali bagi orang-orang yang khusyu'.\"",
+                    reference: "QS. Al-Baqarah: 45"
+                },
+                {
+                    arabic: "إِنَّ الصَّلَاةَ تَنْهَىٰ عَنِ الْفَحْشَاءِ وَالْمُنكَرِ",
+                    transliteration: "Innaṣ-ṣalāta tan-hā 'anil-faḥsyā'i wal-munkar",
+                    translation: "\"Sesungguhnya sholat itu mencegah dari (perbuatan-perbuatan) keji dan mungkar.\"",
+                    reference: "QS. Al-Ankabut: 45"
+                }
+            ];
+            
+            // Data untuk tasbih digital
+            const tasbihData = {
+                'tasbih': {
+                    text: 'سُبْحَانَ اللَّهِ',
+                    translation: 'Maha Suci Allah'
+                },
+                'tahmid': {
+                    text: 'الْحَمْدُ لِلَّهِ',
+                    translation: 'Segala puji bagi Allah'
+                },
+                'takbir': {
+                    text: 'اللَّهُ أَكْبَرُ',
+                    translation: 'Allah Maha Besar'
+                }
+            };
+            
+            // Status aplikasi
+            let isPlaying = false;
+            let currentCity = 'Tangerang';
+            let currentQuoteIndex = 0;
+            let prayerTimes = {};
+            let tasbihCount = 0;
+            let currentTasbihType = 'tasbih';
+            
+            // Inisialisasi
+            function init() {
+                updateDateDisplay();
+                calculatePrayerTimes();
+                displayPrayerTimes();
+                updateCountdown();
+                displayCurrentQuote();
+                updateTasbihDisplay();
+                setInterval(updateCountdown, 1000);
+                setInterval(checkPrayerTimes, 1000);
+                
+                // Load saved preferences
+                if (localStorage.getItem('theme') === 'light') {
+                    enableLightMode();
+                }
+                
+                if (localStorage.getItem('city')) {
+                    currentCity = localStorage.getItem('city');
+                    citySelect.value = currentCity;
+                    updateLocationDisplay();
+                    calculatePrayerTimes();
+                    displayPrayerTimes();
+                }
+                
+                if (localStorage.getItem('method')) {
+                    methodSelect.value = localStorage.getItem('method');
+                }
+                
+                if (localStorage.getItem('madhhab')) {
+                    madhhabSelect.value = localStorage.getItem('madhhab');
+                }
+            }
+            
+            // Update tampilan lokasi
+            function updateLocationDisplay() {
+                locationDisplay.textContent = currentCity + ', Indonesia';
+            }
+            
+            // Update tampilan tanggal
+            function updateDateDisplay() {
+                const now = new Date();
+                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                dateDisplay.textContent = now.toLocaleDateString('id-ID', options);
+            }
+            
+            // Kalkulasi waktu sholat berdasarkan lokasi dan metode
+            function calculatePrayerTimes() {
+                const now = new Date();
+                const coordinates = cityCoordinates[currentCity];
+                const method = methodSelect.value;
+                const madhhab = madhhabSelect.value;
+                
+                // Dapatkan parameter metode
+                const methodParams = calculationMethods[method];
+                
+                // Hitung Julian Date
+                const julianDate = calculateJulianDate(now);
+                
+                // Hitung waktu sholat berdasarkan koordinat
+                const times = calculatePrayerTimesFromCoordinates(
+                    coordinates.lat, 
+                    coordinates.lng, 
+                    coordinates.timezone,
+                    julianDate,
+                    methodParams,
+                    madhhab
+                );
+                
+                prayerTimes = times;
+            }
+            
+            // Hitung Julian Date
+            function calculateJulianDate(date) {
+                const year = date.getFullYear();
+                const month = date.getMonth() + 1;
+                const day = date.getDate();
+                const hours = date.getHours();
+                const minutes = date.getMinutes();
+                const seconds = date.getSeconds();
+                
+                // Konversi ke Julian Date
+                const a = Math.floor((14 - month) / 12);
+                const y = year + 4800 - a;
+                const m = month + 12 * a - 3;
+                
+                let jd = day + Math.floor((153 * m + 2) / 5) + 365 * y + Math.floor(y / 4) - 
+                         Math.floor(y / 100) + Math.floor(y / 400) - 32045;
+                
+                // Tambahkan fraksi hari
+                jd += (hours - 12) / 24 + minutes / 1440 + seconds / 86400;
+                
+                return jd;
+            }
+            
+            // Kalkulasi waktu sholat dari koordinat
+            function calculatePrayerTimesFromCoordinates(lat, lng, timezone, julianDate, methodParams, madhhab) {
+                // Konversi latitude dan longitude ke radian
+                const latRad = lat * Math.PI / 180;
+                
+                // Hitung deklinasi matahari
+                const D = julianDate - 2451545.0;
+                const g = 357.529 + 0.98560028 * D;
+                const q = 280.459 + 0.98564736 * D;
+                const L = q + 1.915 * Math.sin(g * Math.PI/180) + 0.020 * Math.sin(2 * g * Math.PI/180);
+                
+                const e = 23.439 - 0.00000036 * D;
+                const RA = Math.atan2(Math.cos(e * Math.PI/180) * Math.sin(L * Math.PI/180), Math.cos(L * Math.PI/180)) * 180/Math.PI;
+                const delta = Math.asin(Math.sin(e * Math.PI/180) * Math.sin(L * Math.PI/180)) * 180/Math.PI;
+                
+                // Hitung equation of time
+                const equationOfTime = 4 * (q - RA);
+                
+                // Hitung waktu Dzuhur
+                const zuhurTime = 12 + (timezone * 15 - lng) / 15 - equationOfTime / 60;
+                
+                // Hitung waktu sholat lainnya berdasarkan metode
+                const fajrAngle = methodParams.fajr;
+                const ishaAngle = methodParams.isha;
+                
+                // Hitung waktu Subuh
+                const fajrDiff = calculateTimeDifference(latRad, delta, fajrAngle, equationOfTime, timezone, lng);
+                const subuhTime = zuhurTime - fajrDiff;
+                
+                // Hitung waktu Terbit
+                const sunriseDiff = calculateTimeDifference(latRad, delta, -0.833, equationOfTime, timezone, lng);
+                const terbitTime = zuhurTime - sunriseDiff;
+                
+                // Hitung waktu Ashar
+                const asharAngle = (madhhab === 'Hanafi') ? 2 : 1;
+                const asharDiff = calculateAsharTime(latRad, delta, asharAngle, equationOfTime, timezone, lng);
+                const asharTime = zuhurTime + asharDiff;
+                
+                // Hitung waktu Maghrib
+                const maghribDiff = calculateTimeDifference(latRad, delta, -0.833, equationOfTime, timezone, lng);
+                const maghribTime = zuhurTime + maghribDiff;
+                
+                // Hitung waktu Isya
+                const ishaDiff = calculateTimeDifference(latRad, delta, ishaAngle, equationOfTime, timezone, lng);
+                const isyaTime = zuhurTime + ishaDiff;
+                
+                // Format waktu
+                return {
+                    'Subuh': formatTime(subuhTime),
+                    'Terbit': formatTime(terbitTime),
+                    'Dzuhur': formatTime(zuhurTime),
+                    'Ashar': formatTime(asharTime),
+                    'Maghrib': formatTime(maghribTime),
+                    'Isya': formatTime(isyaTime)
+                };
+            }
+            
+            // Hitung perbedaan waktu untuk Subuh, Terbit, Maghrib, Isya
+            function calculateTimeDifference(latRad, delta, angle, equationOfTime, timezone, lng) {
+                const deltaRad = delta * Math.PI / 180;
+                const angleRad = angle * Math.PI / 180;
+                
+                const term = (-Math.sin(angleRad) - Math.sin(latRad) * Math.sin(deltaRad)) / 
+                            (Math.cos(latRad) * Math.cos(deltaRad));
+                
+                // Pastikan term dalam range yang valid
+                if (term < -1 || term > 1) {
+                    return 0; // Tidak ada waktu sholat (seperti di daerah kutub)
+                }
+                
+                const timeDiff = Math.acos(term) * 180 / Math.PI / 15;
+                return timeDiff;
+            }
+            
+            // Hitung waktu Ashar
+            function calculateAsharTime(latRad, delta, shadowLength, equationOfTime, timezone, lng) {
+                const deltaRad = delta * Math.PI / 180;
+                const angle = Math.atan(1 / (shadowLength + Math.tan(Math.abs(latRad - deltaRad))));
+                const angleDeg = angle * 180 / Math.PI;
+                
+                const term = (Math.sin(angleDeg * Math.PI/180) - Math.sin(latRad) * Math.sin(deltaRad)) / 
+                            (Math.cos(latRad) * Math.cos(deltaRad));
+                
+                // Pastikan term dalam range yang valid
+                if (term < -1 || term > 1) {
+                    return 3.5; // Default value jika perhitungan tidak valid
+                }
+                
+                const timeDiff = Math.acos(term) * 180 / Math.PI / 15;
+                return timeDiff;
+            }
+            
+            // Format waktu dari decimal hours ke HH:MM
+            function formatTime(time) {
+                // Normalisasi waktu ke range 0-24
+                while (time < 0) time += 24;
+                while (time >= 24) time -= 24;
+                
+                const hours = Math.floor(time);
+                const minutes = Math.floor((time - hours) * 60);
+                
+                return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+            }
+            
+            // Tampilkan waktu sholat
+            function displayPrayerTimes() {
+                prayerTimesContainer.innerHTML = '';
+                
+                for (const [name, time] of Object.entries(prayerTimes)) {
+                    const card = document.createElement('div');
+                    card.className = 'prayer-card';
+                    card.id = `prayer-${name.toLowerCase()}`;
+                    
+                    card.innerHTML = `
+                        <div class="prayer-name">${name}</div>
+                        <div class="prayer-time">${time}</div>
+                    `;
+                    
+                    prayerTimesContainer.appendChild(card);
+                }
+            }
+            
+            // Tampilkan quote saat ini
+            function displayCurrentQuote() {
+                const quote = quotes[currentQuoteIndex];
+                quoteSection.innerHTML = `
+                    <div class="quote-arabic">${quote.arabic}</div>
+                    <div class="quote-transliteration">${quote.transliteration}</div>
+                    <div class="quote-translation">${quote.translation}</div>
+                    <div class="quote-reference">${quote.reference}</div>
+                `;
+            }
+            
+            // Fungsi untuk tasbih digital
+            function updateTasbihDisplay() {
+                tasbihCounter.textContent = tasbihCount;
+                tasbihArabic.textContent = tasbihData[currentTasbihType].text;
+                tasbihTranslation.textContent = `"${tasbihData[currentTasbihType].translation}"`;
+            }
+            
+            // Update countdown
+            function updateCountdown() {
+                const now = new Date();
+                const currentTime = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+                
+                // Cari waktu sholat berikutnya
+                let nextPrayer = null;
+                let nextPrayerTime = null;
+                
+                for (const [name, time] of Object.entries(prayerTimes)) {
+                    const [hours, minutes] = time.split(':').map(Number);
+                    const prayerTimeInSeconds = hours * 3600 + minutes * 60;
+                    
+                    if (prayerTimeInSeconds > currentTime) {
+                        if (!nextPrayer || prayerTimeInSeconds < nextPrayerTime) {
+                            nextPrayer = name;
+                            nextPrayerTime = prayerTimeInSeconds;
+                        }
+                    }
+                }
+                
+                // Jika tidak ada sholat lagi hari ini, gunakan sholat pertama besok
+                if (!nextPrayer) {
+                    const firstPrayerTime = Object.values(prayerTimes)[0];
+                    const [hours, minutes] = firstPrayerTime.split(':').map(Number);
+                    nextPrayerTime = hours * 3600 + minutes * 60 + 24 * 3600; // Tambah 24 jam
+                    nextPrayer = Object.keys(prayerTimes)[0];
+                }
+                
+                const timeRemaining = nextPrayerTime - currentTime;
+                const hours = Math.floor(timeRemaining / 3600);
+                const minutes = Math.floor((timeRemaining % 3600) / 60);
+                const seconds = timeRemaining % 60;
+                
+                countdownElement.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            }
+            
+            // Cek apakah sudah waktu sholat
+            function checkPrayerTimes() {
+                const now = new Date();
+                const currentTime = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+                
+                for (const [name, time] of Object.entries(prayerTimes)) {
+                    const [hours, minutes] = time.split(':').map(Number);
+                    const prayerTimeInSeconds = hours * 3600 + minutes * 60;
+                    
+                    // Jika waktu saat ini dalam rentang 10 detik setelah waktu sholat
+                    if (Math.abs(currentTime - prayerTimeInSeconds) < 10) {
+                        playAzan(name);
+                        showNotification(`Waktu ${name} telah tiba`);
+                        
+                        // Highlight waktu sholat yang aktif
+                        document.querySelectorAll('.prayer-card').forEach(card => {
+                            card.classList.remove('active');
+                        });
+                        document.getElementById(`prayer-${name.toLowerCase()}`).classList.add('active');
+                    }
+                }
+            }
+            
+            // Memutar suara azan
+            function playAzan(prayerName) {
+                if (isPlaying) return; // Jika sudah sedang diputar, jangan putar lagi
+                
+                azanAudio.volume = volumeControl.value;
+                azanAudio.play()
+                    .then(() => {
+                        isPlaying = true;
+                        stopButton.style.display = 'block'; // Tampilkan tombol stop
+                    })
+                    .catch(error => {
+                        console.log('Autoplay prevented: ', error);
+                        showNotification('Klik tombol Test untuk memutar azan');
+                    });
+            }
+            
+            // Menghentikan suara azan
+            function stopAzan() {
+                azanAudio.pause();
+                azanAudio.currentTime = 0;
+                isPlaying = false;
+                stopButton.style.display = 'none'; // Sembunyikan tombol stop
+                showNotification('Azan dihentikan');
+            }
+            
+            // Tampilkan notifikasi
+            function showNotification(message) {
+                notificationText.textContent = message;
+                notification.classList.add('show');
+                
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 5000);
+            }
+            
+            // Aktifkan mode terang
+            function enableLightMode() {
+                document.body.classList.add('light-mode');
+                themeToggle.textContent = '☀️';
+                localStorage.setItem('theme', 'light');
+            }
+            
+            // Aktifkan mode gelap
+            function enableDarkMode() {
+                document.body.classList.remove('light-mode');
+                themeToggle.textContent = '🌙';
+                localStorage.setItem('theme', 'dark');
+            }
+            
+            // Event listeners untuk tasbih digital
+            tasbihAdd.addEventListener('click', function() {
+                tasbihCount++;
+                updateTasbihDisplay();
+                
+                // Animasi
+                tasbihCounter.style.transform = 'scale(1.1)';
+                setTimeout(() => {
+                    tasbihCounter.style.transform = 'scale(1)';
+                }, 100);
+            });
+            
+            tasbihReset.addEventListener('click', function() {
+                tasbihCount = 0;
+                updateTasbihDisplay();
+            });
+            
+            tasbihTypes.forEach(type => {
+                type.addEventListener('click', function() {
+                    tasbihTypes.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    currentTasbihType = this.getAttribute('data-type');
+                    updateTasbihDisplay();
+                });
+            });
+            
+            // Event listeners
+            testButton.addEventListener('click', function() {
+                playAzan('Test');
+                showNotification('Memutar suara azan untuk testing');
+            });
+            
+            stopButton.addEventListener('click', stopAzan);
+            
+            volumeControl.addEventListener('input', function() {
+                azanAudio.volume = this.value;
+            });
+            
+            themeToggle.addEventListener('click', function() {
+                if (document.body.classList.contains('light-mode')) {
+                    enableDarkMode();
+                } else {
+                    enableLightMode();
+                }
+            });
+            
+            citySelect.addEventListener('change', function() {
+                currentCity = this.value;
+                localStorage.setItem('city', currentCity);
+                updateLocationDisplay();
+                calculatePrayerTimes();
+                displayPrayerTimes();
+                showNotification(`Lokasi diubah ke ${currentCity}`);
+            });
+            
+            methodSelect.addEventListener('change', function() {
+                localStorage.setItem('method', this.value);
+                calculatePrayerTimes();
+                displayPrayerTimes();
+                showNotification(`Metode perhitungan diubah ke ${this.options[this.selectedIndex].text}`);
+            });
+            
+            madhhabSelect.addEventListener('change', function() {
+                localStorage.setItem('madhhab', this.value);
+                calculatePrayerTimes();
+                displayPrayerTimes();
+                showNotification(`Mazhab diubah ke ${this.options[this.selectedIndex].text}`);
+            });
+            
+            // Event ketika audio selesai diputar
+            azanAudio.addEventListener('ended', function() {
+                isPlaying = false;
+                stopButton.style.display = 'none';
+            });
+            
+            // Jalankan inisialisasi
+            init();
+        });
+    </script>
+</body>
+</html>
